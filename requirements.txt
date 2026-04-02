@@ -1,0 +1,20 @@
+# crisprHAL Streamlit v2 — dependencies
+#
+# tensorflow-cpu is used in place of tensorflow because Streamlit Community
+# Cloud runs on CPU-only hardware. tensorflow-cpu==2.19.0 is functionally
+# identical to tensorflow==2.19.0 for inference, with a significantly smaller
+# install footprint (~300 MB vs ~600 MB), and avoids CUDA-related overhead.
+#
+# Minimum TF version: 2.16 (required for native .keras format support via Keras 3).
+# Models were trained and saved with TF 2.19; loading with any earlier TF 2.x
+# that ships Keras 2 (.h5 format is backward-compatible).
+#
+# Python 3.11 is specified in runtime.txt (TF 2.19 supports 3.9–3.12).
+# Python 3.11 is used over 3.12 for better Streamlit Cloud stability.
+
+streamlit>=1.40.0
+tensorflow-cpu==2.19.0
+numpy>=1.26.0
+pandas>=2.2.0
+matplotlib>=3.9.0
+seaborn>=0.13.0
