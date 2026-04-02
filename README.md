@@ -41,24 +41,3 @@ streamlit run streamlit_app.py
 3. Set the main file to `streamlit_app.py`
 
 `runtime.txt` pins Python 3.11 and `requirements.txt` uses `tensorflow-cpu==2.19.0` (CPU-only, appropriate for Streamlit Community Cloud's CPU-only environment).
-
-## Data availability
-
-Raw sequence reads from which the training datasets are derived are available at:
-* https://www.ncbi.nlm.nih.gov/bioproject/PRJNA939699
-* https://www.ncbi.nlm.nih.gov/bioproject/PRJNA1260991
-* https://www.ncbi.nlm.nih.gov/bioproject/PRJNA450978
-
-## Citations
-
-Browne, T.S. et al. Better data for better predictions: data curation improves deep learning for sgRNA/Cas9 prediction. **bioRxiv** (Pre-Print, 2025). https://doi.org/10.1101/2025.06.24.661356
-
-Ham, D.T., Browne, T.S. et al. PAM adenine methylation and flanking sequence regulate SaCas9 activity in bacteria. **Nucleic Acids Res** (2025). https://doi.org/10.1093/nar/gkaf1520
-
-Ham, D.T., Browne, T.S., Banglorewala, P.N. et al. A generalizable Cas9/sgRNA prediction model using machine transfer learning with small high-quality datasets. **Nat Commun** *14*, 5514 (2023). https://doi.org/10.1038/s41467-023-41143-7
-
-Guo, J. et al. Improved sgRNA design in bacteria via genome-wide activity profiling. **Nucleic Acids Res** *46*, 7052–7069 (2018).
-
-Abadi, M. et al. TensorFlow: Large-scale machine learning on heterogeneous systems (2015). https://tensorflow.org
-
-Virtanen, P. et al. SciPy 1.0: fundamental algorithms for scientific computing in python. **Nat Methods** *17*, 261–272 (2020).
