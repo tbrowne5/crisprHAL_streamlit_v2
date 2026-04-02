@@ -159,12 +159,17 @@ proc = processing()
 # Cached model loader — prevents reloading on every Streamlit rerun
 # ---------------------------------------------------------------------------
 
+@tf.keras.saving.register_keras_serializable(package="Custom")
 class _LegacyGRU(tf.keras.layers.GRU):
-    """GRU wrapper that accepts Keras 2 config keys removed in Keras 3.
+    """GRU wrapper for loading Keras 2 H5 models under Keras 3.
 
-    H5 models saved with Keras 2 store 'time_major' and 'implementation' in
-    the layer config. Keras 3's GRU no longer accepts those arguments, so
-    loading raises an error. This subclass absorbs them and forwards the rest.
+    Keras 2 stored 'time_major' and 'implementation' in the GRU config;
+    Keras 3 removed them. Loading fails in two ways without this class:
+      1. First pass: 'GRU' class not found by name → fixed via custom_objects.
+      2. Second pass: Keras 3 re-serializes the Bidirectional inner layer as
+         '_LegacyGRU', then immediately tries to look it up in the Keras class
+         registry. Without @register_keras_serializable it is not there → error.
+    The decorator registers the class so both passes resolve correctly.
     """
     def __init__(self, *args, time_major=False, implementation=1, **kwargs):
         super().__init__(*args, **kwargs)
