@@ -258,8 +258,12 @@ One sequence per line. An optional second column with experimental scores is ign
 # Prediction
 # ---------------------------------------------------------------------------
 
+_MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 MB
+
 if uploaded_file is not None:
-    if st.button("Run Prediction", type="primary"):
+    if len(uploaded_file.getvalue()) > _MAX_UPLOAD_BYTES:
+        st.error("File exceeds the 5 MB limit. Please upload a smaller file.")
+    elif st.button("Run Prediction", type="primary"):
         filename = uploaded_file.name
         content = uploaded_file.getvalue().decode("utf-8")
 
