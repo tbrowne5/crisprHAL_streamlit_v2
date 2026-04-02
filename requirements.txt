@@ -1,18 +1,18 @@
 # crisprHAL Streamlit v2 — dependencies
 #
-# tensorflow-cpu was discontinued after TF 2.15; TF 2.16+ ships a unified
-# package. Use tensorflow==2.19.0 — on CPU-only hardware (Streamlit Community
-# Cloud) it automatically runs in CPU mode with no GPU overhead.
+# IMPORTANT — Python version:
+#   Streamlit Community Cloud ignores runtime.txt. The Python version MUST be
+#   set to 3.13 in the app's Advanced Settings on share.streamlit.io.
+#   TensorFlow has no wheels for Python 3.14 (the current Cloud default).
 #
-# Minimum TF version: 2.16 (required for native .keras format support via Keras 3).
-# Models were trained and saved with TF 2.19; loading with any earlier TF 2.x
-# that ships Keras 2 would not support the .keras format.
+# TensorFlow 2.21.0 is the minimum version with Python 3.13 wheel support.
+# Models saved with TF 2.19 (.keras / .h5) load correctly under TF 2.21 —
+# TF maintains backward compatibility for saved model formats across minor versions.
 #
-# Python 3.11 is specified in runtime.txt (TF 2.19 supports 3.9–3.12).
-# Python 3.11 is used over 3.12 for better Streamlit Cloud stability.
+# Minimum TF version for .keras format: 2.16 (requires Keras 3, bundled with TF 2.16+).
 
 streamlit>=1.40.0
-tensorflow==2.19.0
+tensorflow==2.21.0
 numpy>=1.26.0
 pandas>=2.2.0
 matplotlib>=3.9.0

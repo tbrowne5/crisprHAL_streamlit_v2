@@ -28,7 +28,7 @@ Context requirements match the crisprHAL command-line tool exactly:
 ## Running locally
 
 ```bash
-python3.11 -m venv .venv
+python3.13 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 streamlit run streamlit_app.py
@@ -36,8 +36,18 @@ streamlit run streamlit_app.py
 
 ## Deploying on Streamlit Community Cloud
 
-1. Fork this repository
-2. Connect it at [share.streamlit.io](https://share.streamlit.io)
-3. Set the main file to `streamlit_app.py`
+> **Python version must be set manually in the UI.**
+> Streamlit Community Cloud currently ignores `runtime.txt`. The Python version
+> must be selected in **Advanced Settings** before deploying — TensorFlow has no
+> wheels for the current default (Python 3.14).
 
-`runtime.txt` pins Python 3.11 and `requirements.txt` uses `tensorflow==2.19.0`. The `tensorflow-cpu` package was discontinued after TF 2.15; the unified `tensorflow` package runs in CPU mode automatically on Streamlit Community Cloud's CPU-only hardware.
+Steps:
+1. Fork this repository
+2. Go to [share.streamlit.io](https://share.streamlit.io) → New app
+3. Select the repo and set the main file to `streamlit_app.py`
+4. Click **Advanced settings** → set **Python version to 3.13**
+5. Deploy
+
+If the app was already deployed with the wrong Python version, delete it and redeploy — the Python version cannot be changed on an existing deployment.
+
+`requirements.txt` uses `tensorflow==2.21.0`, the earliest TF release with Python 3.13 wheel support. Models saved under TF 2.19 load correctly — TF maintains backward compatibility for `.keras` and `.h5` formats across minor versions.
