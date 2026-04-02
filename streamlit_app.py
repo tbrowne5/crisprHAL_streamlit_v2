@@ -161,6 +161,14 @@ proc = processing()
 
 @st.cache_resource
 def load_model(path: str):
+    # .h5 models were saved with Keras 2; Keras 3 (TF 2.16+) cannot locate the
+    # 'GRU' class by name during H5 deserialization. Supplying it explicitly via
+    # custom_objects resolves the mismatch without altering model behaviour.
+    if path.endswith(".h5"):
+        return tf.keras.models.load_model(
+            path,
+            custom_objects={"GRU": tf.keras.layers.GRU},
+        )
     return tf.keras.models.load_model(path)
 
 
@@ -437,34 +445,3 @@ if uploaded_file is not None:
 
         except Exception as exc:
             st.error(f"An error occurred during processing: {exc}")
-
-
-# ---------------------------------------------------------------------------
-# Footer — citations
-# ---------------------------------------------------------------------------
-
-st.markdown(
-    """
-    <style>
-    .footer {
-        color: white;
-        position: fixed;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        background-color: #00000D;
-        padding: 8px 20px 8px 360px;
-        font-size: 0.80em;
-        line-height: 1.6;
-    }
-    @media (max-width: 768px) { .footer { padding-left: 20px; } }
-    </style>
-    <div class="footer">
-        <b>CITE:</b>
-        Browne, T.S. et al. Better data for better predictions: data curation improves deep learning for sgRNA/Cas9 prediction. <em>bioRxiv</em> (2025) &mdash;
-        Ham, D.T., Browne, T.S. et al. PAM adenine methylation and flanking sequence regulate SaCas9 activity in bacteria. <em>Nucleic Acids Res</em> (2025) &mdash;
-        Ham, D.T., Browne, T.S., Banglorewala, P.N. et al. A generalizable Cas9/sgRNA prediction model using machine transfer learning with small high-quality datasets. <em>Nat Commun</em> <b>14</b>, 5514 (2023).
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
