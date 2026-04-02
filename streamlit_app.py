@@ -19,6 +19,7 @@ MODELS = {
         "pam": "NGG",
         "organism": "E. coli / C. rodentium",
         "min_input_nt": 37,
+        "max_guides": 40_000,
         "in_progress": False,
         "description": (
             "Recommended for TevSpCas9 and SpCas9 activity prediction. "
@@ -54,6 +55,7 @@ MODELS = {
         "pam": "NGG",
         "organism": "E. coli",
         "min_input_nt": 406,
+        "max_guides": 5_000,
         "in_progress": False,
         "description": (
             "Enhanced SpCas9 variant. "
@@ -87,6 +89,7 @@ MODELS = {
         "pam": "NGG",
         "organism": "E. coli",
         "min_input_nt": 378,
+        "max_guides": 5_000,
         "in_progress": False,
         "description": (
             "Wild-type SpCas9. Secondary SpCas9 prediction model. "
@@ -287,11 +290,14 @@ if uploaded_file is not None:
                 )
                 st.stop()
 
-            if len(sequences) > 50_000:
+            max_guides = meta["max_guides"]
+            if len(sequences) > max_guides:
                 st.warning(
-                    f"Found {len(sequences):,} targets — prediction may be slow on CPU. "
-                    "Consider splitting your input into smaller files."
+                    f"Found {len(sequences):,} targets — truncated to the first "
+                    f"{max_guides:,} for the {model_name} model."
                 )
+                sequences = sequences[:max_guides]
+                encoded = encoded[:max_guides]
 
             # --- Predict ---
             with st.spinner(
