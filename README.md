@@ -40,4 +40,4 @@ streamlit run streamlit_app.py
 2. Connect it at [share.streamlit.io](https://share.streamlit.io)
 3. Set the main file to `streamlit_app.py`
 
-`runtime.txt` pins Python 3.11 and `requirements.txt` uses `tensorflow-cpu==2.19.0` (CPU-only, appropriate for Streamlit Community Cloud's CPU-only environment).
+`runtime.txt` pins Python 3.11 and `requirements.txt` uses `tensorflow==2.19.0`. The `tensorflow-cpu` package was discontinued after TF 2.15; the unified `tensorflow` package runs in CPU mode automatically on Streamlit Community Cloud's CPU-only hardware.
