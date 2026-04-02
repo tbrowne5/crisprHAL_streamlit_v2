@@ -159,15 +159,23 @@ proc = processing()
 # Cached model loader — prevents reloading on every Streamlit rerun
 # ---------------------------------------------------------------------------
 
+class _LegacyGRU(tf.keras.layers.GRU):
+    """GRU wrapper that accepts Keras 2 config keys removed in Keras 3.
+
+    H5 models saved with Keras 2 store 'time_major' and 'implementation' in
+    the layer config. Keras 3's GRU no longer accepts those arguments, so
+    loading raises an error. This subclass absorbs them and forwards the rest.
+    """
+    def __init__(self, *args, time_major=False, implementation=1, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
 @st.cache_resource
 def load_model(path: str):
-    # .h5 models were saved with Keras 2; Keras 3 (TF 2.16+) cannot locate the
-    # 'GRU' class by name during H5 deserialization. Supplying it explicitly via
-    # custom_objects resolves the mismatch without altering model behaviour.
     if path.endswith(".h5"):
         return tf.keras.models.load_model(
             path,
-            custom_objects={"GRU": tf.keras.layers.GRU},
+            custom_objects={"GRU": _LegacyGRU},
         )
     return tf.keras.models.load_model(path)
 
