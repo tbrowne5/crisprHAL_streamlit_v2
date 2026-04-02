@@ -159,29 +159,47 @@ proc = processing()
 # Cached model loader — prevents reloading on every Streamlit rerun
 # ---------------------------------------------------------------------------
 
-@tf.keras.saving.register_keras_serializable(package="Custom")
-class _LegacyGRU(tf.keras.layers.GRU):
-    """GRU wrapper for loading Keras 2 H5 models under Keras 3.
+def _load_legacy_h5(path: str):
+    """Load a Keras 2 .h5 model under Keras 3.
 
-    Keras 2 stored 'time_major' and 'implementation' in the GRU config;
-    Keras 3 removed them. Loading fails in two ways without this class:
-      1. First pass: 'GRU' class not found by name → fixed via custom_objects.
-      2. Second pass: Keras 3 re-serializes the Bidirectional inner layer as
-         '_LegacyGRU', then immediately tries to look it up in the Keras class
-         registry. Without @register_keras_serializable it is not there → error.
-    The decorator registers the class so both passes resolve correctly.
+    Keras 2 stored 'time_major' and 'implementation' in every GRU layer config.
+    Keras 3 removed both parameters; tf.keras.models.load_model raises on them
+    before even reaching the weight-loading stage. The approach here:
+      1. Read the model_config JSON directly from the H5 file via h5py.
+      2. Recursively strip the incompatible keys from every GRU config block.
+      3. Reconstruct the model architecture from the patched JSON.
+      4. Load the saved weights back into that architecture.
+    This avoids all custom-class / registry complexity.
     """
-    def __init__(self, *args, time_major=False, implementation=1, **kwargs):
-        super().__init__(*args, **kwargs)
+    import h5py, json
+
+    with h5py.File(path, "r") as f:
+        raw = f.attrs.get("model_config")
+        if raw is None:
+            raise ValueError(f"'{path}' contains no model_config attribute.")
+        config = json.loads(raw)
+
+    _LEGACY_GRU_KEYS = ("time_major", "implementation")
+
+    def _patch(obj):
+        if isinstance(obj, dict):
+            if obj.get("class_name") in ("GRU", "CuDNNGRU"):
+                for k in _LEGACY_GRU_KEYS:
+                    obj.get("config", {}).pop(k, None)
+            return {k: _patch(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [_patch(item) for item in obj]
+        return obj
+
+    model = tf.keras.models.model_from_json(json.dumps(_patch(config)))
+    model.load_weights(path)
+    return model
 
 
 @st.cache_resource
 def load_model(path: str):
     if path.endswith(".h5"):
-        return tf.keras.models.load_model(
-            path,
-            custom_objects={"GRU": _LegacyGRU},
-        )
+        return _load_legacy_h5(path)
     return tf.keras.models.load_model(path)
 
 
