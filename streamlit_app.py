@@ -116,40 +116,9 @@ MODELS = {
             ("PRJNA1260991", "https://www.ncbi.nlm.nih.gov/bioproject/PRJNA1260991"),
         ],
     },
-    "TevSaCas9": {
-        "path": "models/TEVSACAS9.h5",
-        "params": [29, 1, 8, 1],
-        "pam": "NNGRRN",
-        "organism": "S. aureus",
-        "min_input_nt": 29,
-        "in_progress": True,
-        "description": (
-            "SaCas9 and TevSaCas9 activity prediction. Uses NNGRRN PAM. "
-            "Note: this model is still in active development."
-        ),
-        "input_note": (
-            "29 nt context: 1 upstream + 20 sgRNA + 8 downstream (NNGRRN PAM + 2)"
-        ),
-        "citations": [
-            (
-                "crisprHAL SaCas9",
-                "Ham, D.T., Browne, T.S. et al. PAM adenine methylation and flanking "
-                "sequence regulate SaCas9 activity in bacteria. "
-                "*Nucleic Acids Res* (2025).",
-                "https://doi.org/10.1093/nar/gkaf1520",
-            ),
-            (
-                "crisprHAL",
-                "Ham, D.T., Browne, T.S., Banglorewala, P.N. et al. A generalizable "
-                "Cas9/sgRNA prediction model using machine transfer learning with small "
-                "high-quality datasets. *Nat Commun* **14**, 5514 (2023).",
-                "https://doi.org/10.1038/s41467-023-41143-7",
-            ),
-        ],
-        "data": [
-            ("PRJNA450978", "https://www.ncbi.nlm.nih.gov/bioproject/PRJNA450978"),
-        ],
-    },
+    # TevSaCas9 is temporarily disabled — the TEVSACAS9.h5 file was saved with
+    # Keras 2 and cannot be loaded under Keras 3 (TF 2.16+) due to breaking
+    # changes in GRU serialization. See TEVSACAS9_COMPAT.md for full details.
 }
 
 proc = processing()
@@ -159,47 +128,8 @@ proc = processing()
 # Cached model loader — prevents reloading on every Streamlit rerun
 # ---------------------------------------------------------------------------
 
-def _load_legacy_h5(path: str):
-    """Load a Keras 2 .h5 model under Keras 3.
-
-    Keras 2 stored 'time_major' and 'implementation' in every GRU layer config.
-    Keras 3 removed both parameters; tf.keras.models.load_model raises on them
-    before even reaching the weight-loading stage. The approach here:
-      1. Read the model_config JSON directly from the H5 file via h5py.
-      2. Recursively strip the incompatible keys from every GRU config block.
-      3. Reconstruct the model architecture from the patched JSON.
-      4. Load the saved weights back into that architecture.
-    This avoids all custom-class / registry complexity.
-    """
-    import h5py, json
-
-    with h5py.File(path, "r") as f:
-        raw = f.attrs.get("model_config")
-        if raw is None:
-            raise ValueError(f"'{path}' contains no model_config attribute.")
-        config = json.loads(raw)
-
-    _LEGACY_GRU_KEYS = ("time_major", "implementation")
-
-    def _patch(obj):
-        if isinstance(obj, dict):
-            if obj.get("class_name") in ("GRU", "CuDNNGRU"):
-                for k in _LEGACY_GRU_KEYS:
-                    obj.get("config", {}).pop(k, None)
-            return {k: _patch(v) for k, v in obj.items()}
-        if isinstance(obj, list):
-            return [_patch(item) for item in obj]
-        return obj
-
-    model = tf.keras.models.model_from_json(json.dumps(_patch(config)))
-    model.load_weights(path)
-    return model
-
-
 @st.cache_resource
 def load_model(path: str):
-    if path.endswith(".h5"):
-        return _load_legacy_h5(path)
     return tf.keras.models.load_model(path)
 
 
