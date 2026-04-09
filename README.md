@@ -1,5 +1,8 @@
-# crisprHAL Streamlit App — v2
-The up-to-date web interface for [crisprHAL](https://github.com/tbrowne5/crisprHAL) bacterial Cas9/sgRNA on-target activity prediction.
+## crisprHAL — Repository for the V2 Streamlit App
+
+<p align="center">
+  <img src="https://github.com/tbrowne5/crisprHAL/blob/main/data/crisprHAL_Logo.png" width="600">
+</p>
 
 ## Links to the related repositories, papers, and web tool:
 * [Up-to-date crisprHAL prediction tool repository for use](https://github.com/tbrowne5/crisprHAL)
